@@ -1,11 +1,10 @@
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Home, User, MapPin, Package } from 'lucide-react';
+import { User, MapPin, Package } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 // Mock data for demonstration
 const user = {
@@ -29,9 +28,6 @@ export default function AccountPage() {
     return (
         <div className="container mx-auto px-4 py-8 md:py-12">
             <header className="mb-8">
-                <Button asChild variant="ghost" className="mb-4">
-                    <Link href="/"><Home className="mr-2 h-4 w-4"/> Back to Store</Link>
-                </Button>
                 <h1 className="font-headline text-4xl md:text-5xl font-bold">My Account</h1>
             </header>
 

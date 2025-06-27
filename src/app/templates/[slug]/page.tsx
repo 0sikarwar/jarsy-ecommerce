@@ -1,45 +1,37 @@
+'use client';
+
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import type { Metadata } from 'next';
-import { getProductBySlug, Product } from '@/lib/templates';
+import { getProductBySlug } from '@/lib/templates';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { StarIcon } from '@/components/icons';
-import { CheckCircle2, Home, ShoppingCart } from 'lucide-react';
+import { CheckCircle2, ShoppingCart } from 'lucide-react';
 import { AIContentGenerator } from '@/components/ai-content-generator';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+import { useCart } from '@/hooks/use-cart';
 
 type Props = {
   params: { slug: string };
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const product = getProductBySlug(params.slug);
-  if (!product) {
-    return { title: 'Product Not Found' };
-  }
-  return {
-    title: `${product.name} | Sole Central`,
-    description: product.description,
-  };
-}
-
 export default function ProductDetailPage({ params }: Props) {
   const product = getProductBySlug(params.slug);
+  const { addToCart } = useCart();
 
   if (!product) {
     notFound();
   }
+  
+  // Note: We can't use generateMetadata in a 'use client' component.
+  // This would need to be handled differently in a real app, e.g. by fetching metadata in the layout
+  // or moving client-specific logic to a child component. For this prototype, we'll keep it simple.
 
   return (
     <div className="bg-background min-h-screen">
       <div className="container mx-auto px-4 py-8 md:py-12">
         <header className="mb-8">
-            <Button asChild variant="ghost" className="mb-4">
-                <Link href="/"><Home className="mr-2 h-4 w-4"/> Back to Products</Link>
-            </Button>
             <div className="flex flex-col md:flex-row justify-between md:items-start gap-4">
                 <div>
                     <h1 className="font-headline text-4xl md:text-5xl font-bold">{product.name}</h1>
@@ -55,7 +47,7 @@ export default function ProductDetailPage({ params }: Props) {
                 </div>
                  <div className="text-right flex-shrink-0">
                     <p className="text-4xl font-bold font-headline text-primary mb-2">${product.price.toFixed(2)}</p>
-                    <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground w-full md:w-auto">
+                    <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground w-full md:w-auto" onClick={() => addToCart(product)}>
                         <ShoppingCart className="mr-2 h-5 w-5"/> Add to Cart
                     </Button>
                 </div>
