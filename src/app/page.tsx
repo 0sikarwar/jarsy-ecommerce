@@ -5,7 +5,9 @@ import type { FC } from 'react';
 import { templates, Template } from '@/lib/templates';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TemplateCard } from '@/components/template-card';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, User } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 const categories = ['All', 'Fashion', 'Electronics', 'Home Goods', 'Beauty'];
 
@@ -18,7 +20,15 @@ const Gallery: FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
-      <header className="text-center mb-8 md:mb-12">
+      <header className="relative text-center mb-8 md:mb-12">
+        <div className="absolute top-0 right-0">
+          <Button asChild variant="ghost" size="icon">
+            <Link href="/account">
+              <User className="h-6 w-6" />
+              <span className="sr-only">Account</span>
+            </Link>
+          </Button>
+        </div>
         <div className="inline-flex items-center justify-center mb-4">
           <Sparkles className="h-8 w-8 text-primary mr-3" />
           <h1 className="font-headline text-4xl md:text-5xl font-bold tracking-tight">
