@@ -1,10 +1,11 @@
-export interface Template {
+export interface Product {
   id: number;
   slug: string;
   name: string;
-  category: 'Fashion' | 'Electronics' | 'Home Goods' | 'Beauty';
+  category: 'Sneakers' | 'Boots' | 'Sandals' | 'Formal';
   rating: number;
   description: string;
+  price: number;
   features: string[];
   images: {
     main: string;
@@ -12,17 +13,18 @@ export interface Template {
   };
 }
 
-export const templates: Template[] = [
+export const products: Product[] = [
   {
     id: 1,
-    slug: 'maison-chic',
-    name: 'Maison Chic',
-    category: 'Fashion',
+    slug: 'urban-runner',
+    name: 'Urban Runner',
+    category: 'Sneakers',
     rating: 5,
-    description: 'An elegant and minimalist template designed for high-end fashion brands. Features clean lines, beautiful typography, and a focus on large, stunning imagery.',
-    features: ['Quick view', 'Variant swatches', 'Lookbook page', 'Size guide'],
+    price: 129.99,
+    description: 'Lightweight and stylish sneakers for the modern city dweller. Features a breathable mesh upper and a responsive foam sole for all-day comfort.',
+    features: ['Breathable mesh', 'Responsive foam sole', 'Durable rubber outsole', 'Multiple colorways'],
     images: {
-      main: 'https://placehold.co/800x600/673AB7/F3E5F5.png',
+      main: 'https://placehold.co/800x600.png',
       previews: [
         'https://placehold.co/1200x800.png',
         'https://placehold.co/1200x800.png',
@@ -32,14 +34,15 @@ export const templates: Template[] = [
   },
   {
     id: 2,
-    slug: 'tech-sphere',
-    name: 'Tech Sphere',
-    category: 'Electronics',
+    slug: 'mountain-trekker',
+    name: 'Mountain Trekker',
+    category: 'Boots',
     rating: 4,
-    description: 'A modern, dark-themed template perfect for electronics stores. Built to showcase product specifications and features in a clear, concise manner.',
-    features: ['Advanced filtering', 'Product comparison', '360° product view', 'Customer reviews'],
+    price: 189.99,
+    description: 'Rugged and reliable boots for your next adventure. Waterproof leather and a high-traction outsole keep you comfortable and secure on any terrain.',
+    features: ['Waterproof leather', 'High-traction outsole', 'Ankle support', 'Insulated lining'],
     images: {
-      main: 'https://placehold.co/800x600/3F51B5/F3E5F5.png',
+      main: 'https://placehold.co/800x600.png',
       previews: [
         'https://placehold.co/1200x800.png',
         'https://placehold.co/1200x800.png',
@@ -49,14 +52,15 @@ export const templates: Template[] = [
   },
   {
     id: 3,
-    slug: 'hearth-home',
-    name: 'Hearth & Home',
-    category: 'Home Goods',
+    slug: 'riviera-sandal',
+    name: 'Riviera Sandal',
+    category: 'Sandals',
     rating: 5,
-    description: 'A warm and inviting template for home decor and furniture shops. Its cozy design and intuitive layout make browsing a pleasure for customers.',
-    features: ['Room builder visualization', 'Color swatches', 'Shop the look', 'Gift registry'],
+    price: 79.99,
+    description: 'Elegant and comfortable sandals for sunny days. Handcrafted from supple leather with a cushioned footbed for a luxurious feel.',
+    features: ['Genuine leather straps', 'Cushioned footbed', 'Arch support', 'Handcrafted quality'],
     images: {
-      main: 'https://placehold.co/800x600/E91E63/F3E5F5.png',
+      main: 'https://placehold.co/800x600.png',
       previews: [
         'https://placehold.co/1200x800.png',
         'https://placehold.co/1200x800.png',
@@ -66,14 +70,15 @@ export const templates: Template[] = [
   },
   {
     id: 4,
-    slug: 'glow-up',
-    name: 'Glow Up',
-    category: 'Beauty',
+    slug: 'executive-oxford',
+    name: 'Executive Oxford',
+    category: 'Formal',
     rating: 4,
-    description: 'A vibrant and stylish template for cosmetics and skincare brands. Designed to be mobile-first, with features that highlight product ingredients and benefits.',
-    features: ['Video tutorials', 'Subscription boxes', 'Shade finder quiz', 'Before & after slider'],
+    price: 249.99,
+    description: 'Classic Oxford shoes for the discerning gentleman. Made from premium calfskin leather with a timeless silhouette for any formal occasion.',
+    features: ['Premium calfskin leather', 'Goodyear welt construction', 'Leather sole', 'Classic broguing'],
     images: {
-      main: 'https://placehold.co/800x600/F06292/FFFFFF.png',
+      main: 'https://placehold.co/800x600.png',
       previews: [
         'https://placehold.co/1200x800.png',
         'https://placehold.co/1200x800.png',
@@ -83,14 +88,15 @@ export const templates: Template[] = [
   },
   {
     id: 5,
-    slug: 'atelier-noir',
-    name: 'Atelier Noir',
-    category: 'Fashion',
+    slug: 'velocity-racer',
+    name: 'Velocity Racer',
+    category: 'Sneakers',
     rating: 5,
-    description: 'A sophisticated, dark-mode template for luxury apparel and accessories. Its bold typography and editorial layout create a high-fashion experience.',
-    features: ['Full-screen video background', 'Interactive lookbook', 'Pre-order functionality', 'Appointment booking'],
+    price: 149.99,
+    description: 'High-performance running shoes designed for speed and agility. The carbon-fiber plate and ultra-light materials help you achieve your personal best.',
+    features: ['Carbon-fiber plate', 'Ultra-light construction', 'High-energy return foam', 'Engineered mesh upper'],
     images: {
-      main: 'https://placehold.co/800x600/212121/FFFFFF.png',
+      main: 'https://placehold.co/800x600.png',
       previews: [
         'https://placehold.co/1200x800.png',
         'https://placehold.co/1200x800.png',
@@ -100,14 +106,15 @@ export const templates: Template[] = [
   },
   {
     id: 6,
-    slug: 'gadget-grid',
-    name: 'Gadget Grid',
-    category: 'Electronics',
+    slug: 'chelsea-classic',
+    name: 'Chelsea Classic',
+    category: 'Boots',
     rating: 4,
-    description: 'A clean, grid-based template ideal for stores with a large inventory of gadgets and accessories. Fast, responsive, and highly customizable.',
-    features: ['Mega menu', 'Deal of the day countdown', 'Bundle products', 'Advanced search'],
+    price: 199.99,
+    description: 'A timeless Chelsea boot with a modern twist. Crafted from rich suede with elastic side panels for a perfect blend of style and convenience.',
+    features: ['Rich suede upper', 'Elastic side panels', 'Pull-on design', 'Crepe rubber sole'],
     images: {
-      main: 'https://placehold.co/800x600/4CAF50/FFFFFF.png',
+      main: 'https://placehold.co/800x600.png',
       previews: [
         'https://placehold.co/1200x800.png',
         'https://placehold.co/1200x800.png',
@@ -117,6 +124,6 @@ export const templates: Template[] = [
   },
 ];
 
-export const getTemplateBySlug = (slug: string): Template | undefined => {
-  return templates.find(t => t.slug === slug);
+export const getProductBySlug = (slug: string): Product | undefined => {
+  return products.find(p => p.slug === slug);
 };

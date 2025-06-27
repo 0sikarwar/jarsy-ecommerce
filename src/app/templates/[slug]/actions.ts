@@ -4,14 +4,12 @@ import { generateContentSuggestions, GenerateContentSuggestionsInput } from '@/a
 import { z } from 'zod';
 
 const ActionInputSchema = z.object({
-  templateName: z.string(),
   productName: z.string().min(2, "Product name must be at least 2 characters."),
   productCategory: z.string().min(2, "Product category must be at least 2 characters."),
 });
 
 export async function generateSuggestionsAction(formData: FormData) {
   const input = {
-    templateName: formData.get('templateName') as string,
     productName: formData.get('productName') as string,
     productCategory: formData.get('productCategory') as string,
   };

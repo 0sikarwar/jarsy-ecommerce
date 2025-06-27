@@ -2,21 +2,21 @@
 
 import { useState } from 'react';
 import type { FC } from 'react';
-import { templates, Template } from '@/lib/templates';
+import { products, Product } from '@/lib/templates';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TemplateCard } from '@/components/template-card';
-import { Sparkles, User } from 'lucide-react';
+import { ProductCard } from '@/components/template-card';
+import { Footprints, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
-const categories = ['All', 'Fashion', 'Electronics', 'Home Goods', 'Beauty'];
+const categories = ['All', 'Sneakers', 'Boots', 'Sandals', 'Formal'];
 
 const Gallery: FC = () => {
   const [activeCategory, setActiveCategory] = useState('All');
 
-  const filteredTemplates = activeCategory === 'All'
-    ? templates
-    : templates.filter(t => t.category === activeCategory);
+  const filteredProducts = activeCategory === 'All'
+    ? products
+    : products.filter(p => p.category === activeCategory);
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -30,14 +30,14 @@ const Gallery: FC = () => {
           </Button>
         </div>
         <div className="inline-flex items-center justify-center mb-4">
-          <Sparkles className="h-8 w-8 text-primary mr-3" />
+          <Footprints className="h-8 w-8 text-primary mr-3" />
           <h1 className="font-headline text-4xl md:text-5xl font-bold tracking-tight">
-            Medusa Muse
+            Sole Central
           </h1>
-          <Sparkles className="h-8 w-8 text-primary ml-3" />
+          <Footprints className="h-8 w-8 text-primary ml-3" />
         </div>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Discover expertly crafted ecommerce templates for the Medusa platform. Find the perfect design to launch your store with style and functionality.
+          Find your perfect pair from our curated collection of high-quality footwear. Style, comfort, and quality delivered to your doorstep.
         </p>
       </header>
 
@@ -51,8 +51,8 @@ const Gallery: FC = () => {
         </Tabs>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredTemplates.map(template => (
-            <TemplateCard key={template.id} template={template} />
+          {filteredProducts.map(product => (
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       </main>

@@ -9,20 +9,20 @@ import { Badge } from '@/components/ui/badge';
 
 // Mock data for demonstration
 const user = {
-  name: 'Sofia Davis',
-  email: 'sofia.davis@example.com',
-  memberSince: '2023-01-15',
+  name: 'Alex Rider',
+  email: 'alex.rider@example.com',
+  memberSince: '2023-05-20',
 };
 
 const addresses = [
-  { id: 1, type: 'Shipping', address: '1234 Design Street, Creativity City, CA 98765', isDefault: true },
-  { id: 2, type: 'Billing', address: '5678 Innovation Avenue, Idea Town, CA 54321', isDefault: false },
+  { id: 1, type: 'Shipping', address: '1234 Sneaker Ave, Style City, CA 98765', isDefault: true },
+  { id: 2, type: 'Billing', address: '5678 Boot Boulevard, Comfort Town, CA 54321', isDefault: false },
 ];
 
 const orders = [
-  { id: 'ORD-2024-001', date: '2024-07-15', total: 99.00, status: 'Shipped', items: [{ name: 'Atelier Noir Template', quantity: 1 }] },
-  { id: 'ORD-2024-002', date: '2024-06-28', total: 49.00, status: 'Delivered', items: [{ name: 'Glow Up Template', quantity: 1 }] },
-  { id: 'ORD-2023-12-10', date: '2023-12-10', total: 49.00, status: 'Delivered', items: [{ name: 'Tech Sphere Template', quantity: 1 }] },
+  { id: 'ORD-2024-001', date: '2024-07-15', total: 129.99, status: 'Shipped', items: [{ name: 'Urban Runner', quantity: 1 }] },
+  { id: 'ORD-2024-002', date: '2024-06-28', total: 189.99, status: 'Delivered', items: [{ name: 'Mountain Trekker', quantity: 1 }] },
+  { id: 'ORD-2023-12-10', date: '2023-12-10', total: 249.99, status: 'Delivered', items: [{ name: 'Executive Oxford', quantity: 1 }] },
 ];
 
 export default function AccountPage() {
@@ -30,7 +30,7 @@ export default function AccountPage() {
         <div className="container mx-auto px-4 py-8 md:py-12">
             <header className="mb-8">
                 <Button asChild variant="ghost" className="mb-4">
-                    <Link href="/"><Home className="mr-2 h-4 w-4"/> Back to Gallery</Link>
+                    <Link href="/"><Home className="mr-2 h-4 w-4"/> Back to Store</Link>
                 </Button>
                 <h1 className="font-headline text-4xl md:text-5xl font-bold">My Account</h1>
             </header>
@@ -49,7 +49,7 @@ export default function AccountPage() {
                                 <div className="flex items-center gap-4">
                                     <Avatar className="h-16 w-16">
                                         <AvatarImage src="https://placehold.co/128x128.png" alt="User avatar" data-ai-hint="avatar person" />
-                                        <AvatarFallback>SD</AvatarFallback>
+                                        <AvatarFallback>AR</AvatarFallback>
                                     </Avatar>
                                     <div>
                                         <CardTitle className="text-2xl">{user.name}</CardTitle>

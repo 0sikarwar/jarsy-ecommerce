@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'Medusa Muse',
-  description: 'A marketplace for high-quality Medusa ecommerce templates.',
+  title: 'Sole Central',
+  description: 'The one-stop shop for the best shoes on the web.',
 };
 
 export default function RootLayout({

@@ -1,9 +1,9 @@
 'use server';
 
 /**
- * @fileOverview Generates content suggestions (product descriptions, taglines) based on the selected ecommerce template.
+ * @fileOverview Generates content suggestions (product descriptions, taglines) for shoes.
  *
- * - generateContentSuggestions - A function that generates content suggestions based on the selected template.
+ * - generateContentSuggestions - A function that generates content suggestions based on the product info.
  * - GenerateContentSuggestionsInput - The input type for the generateContentSuggestions function.
  * - GenerateContentSuggestionsOutput - The return type for the generateContentSuggestions function.
  */
@@ -12,15 +12,14 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GenerateContentSuggestionsInputSchema = z.object({
-  templateName: z.string().describe('The name of the selected ecommerce template.'),
-  productName: z.string().describe('The name of the product.'),
-  productCategory: z.string().describe('The category of the product.'),
+  productName: z.string().describe('The name of the shoe.'),
+  productCategory: z.string().describe('The category of the shoe (e.g., Sneakers, Boots).'),
 });
 export type GenerateContentSuggestionsInput = z.infer<typeof GenerateContentSuggestionsInputSchema>;
 
 const GenerateContentSuggestionsOutputSchema = z.object({
-  productDescription: z.string().describe('A suggested product description.'),
-  productTagline: z.string().describe('A suggested product tagline.'),
+  productDescription: z.string().describe('A suggested product description for the shoe.'),
+  productTagline: z.string().describe('A suggested product tagline for the shoe.'),
 });
 export type GenerateContentSuggestionsOutput = z.infer<typeof GenerateContentSuggestionsOutputSchema>;
 
@@ -32,16 +31,13 @@ const prompt = ai.definePrompt({
   name: 'generateContentSuggestionsPrompt',
   input: {schema: GenerateContentSuggestionsInputSchema},
   output: {schema: GenerateContentSuggestionsOutputSchema},
-  prompt: `You are an expert in generating content for ecommerce stores.
+  prompt: `You are an expert copywriter for a trendy shoe store.
 
-  Based on the selected template and product information, generate a product description and a product tagline.
+  Based on the product information, generate a compelling product description and a catchy product tagline.
+  Make it sound exciting and desirable for shoe lovers.
 
-  Template Name: {{{templateName}}}
   Product Name: {{{productName}}}
-  Product Category: {{{productCategory}}}
-
-  Product Description:
-  Product Tagline:`,
+  Product Category: {{{productCategory}}}`,
 });
 
 const generateContentSuggestionsFlow = ai.defineFlow(
