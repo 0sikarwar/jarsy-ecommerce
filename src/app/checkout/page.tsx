@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useRouter } from 'next/navigation';
@@ -14,6 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { CreditCard, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useCustomer } from '@/hooks/use-customer';
 
 const checkoutSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -31,6 +33,7 @@ type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart, itemCount } = useCart();
+  const { customer } = useCustomer();
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -50,6 +53,19 @@ export default function CheckoutPage() {
       cardName: '', cardNumber: '', cardExpiry: '', cardCvc: '',
     },
   });
+
+  useEffect(() => {
+    if (customer) {
+        const defaultAddress = customer.shipping_addresses?.[0];
+        form.reset({
+            name: `${customer.first_name} ${customer.last_name}`,
+            email: customer.email,
+            address: defaultAddress?.address_1 || '',
+            city: defaultAddress?.city || '',
+            zip: defaultAddress?.postal_code || '',
+        })
+    }
+  }, [customer, form]);
 
   const onSubmit: SubmitHandler<CheckoutFormValues> = (data) => {
     setIsLoading(true);
