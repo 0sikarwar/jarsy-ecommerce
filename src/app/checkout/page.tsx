@@ -123,7 +123,7 @@ export default function CheckoutPage() {
                         
                         <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
                             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-5 w-5"/>}
-                            {isLoading ? 'Processing...' : `Pay $${totalPrice.toFixed(2)}`}
+                            {isLoading ? 'Processing...' : `Pay ₹${totalPrice.toFixed(2)}`}
                         </Button>
                     </form>
                 </Form>
@@ -141,13 +141,13 @@ export default function CheckoutPage() {
                                         <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                                     </div>
                                 </div>
-                                <p>${(item.price * item.quantity).toFixed(2)}</p>
+                                <p>₹{(item.price * item.quantity).toFixed(2)}</p>
                             </div>
                         ))}
                         <Separator />
                         <div className="flex justify-between font-semibold">
                             <p>Subtotal</p>
-                            <p>${totalPrice.toFixed(2)}</p>
+                            <p>₹{totalPrice.toFixed(2)}</p>
                         </div>
                         <div className="flex justify-between text-muted-foreground">
                             <p>Shipping</p>
@@ -156,7 +156,7 @@ export default function CheckoutPage() {
                         <Separator />
                         <div className="flex justify-between font-bold text-lg">
                             <p>Total</p>
-                            <p>${totalPrice.toFixed(2)}</p>
+                            <p>₹{totalPrice.toFixed(2)}</p>
                         </div>
                     </CardContent>
                 </Card>

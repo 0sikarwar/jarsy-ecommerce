@@ -45,7 +45,7 @@ export function CartSheet() {
                     />
                     <div className="flex-grow">
                       <p className="font-semibold">{item.name}</p>
-                      <p className="text-sm text-muted-foreground">${item.price.toFixed(2)}</p>
+                      <p className="text-sm text-muted-foreground">₹{item.price.toFixed(2)}</p>
                       <div className="flex items-center gap-2 mt-2">
                         <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
                           <Minus className="h-4 w-4" />
@@ -68,7 +68,7 @@ export function CartSheet() {
                     <Separator />
                     <div className="flex justify-between items-center font-semibold text-lg">
                         <span>Subtotal</span>
-                        <span>${totalPrice.toFixed(2)}</span>
+                        <span>₹{totalPrice.toFixed(2)}</span>
                     </div>
                     <Button asChild className="w-full" size="lg">
                       <Link href="/checkout">Proceed to Checkout</Link>

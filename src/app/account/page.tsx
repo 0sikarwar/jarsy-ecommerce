@@ -19,9 +19,9 @@ const addresses = [
 ];
 
 const orders = [
-  { id: 'ORD-2024-001', date: '2024-07-15', total: 129.99, status: 'Shipped', items: [{ name: 'Urban Runner', quantity: 1 }] },
-  { id: 'ORD-2024-002', date: '2024-06-28', total: 189.99, status: 'Delivered', items: [{ name: 'Mountain Trekker', quantity: 1 }] },
-  { id: 'ORD-2023-12-10', date: '2023-12-10', total: 249.99, status: 'Delivered', items: [{ name: 'Executive Oxford', quantity: 1 }] },
+  { id: 'ORD-2024-001', date: '2024-07-15', total: 1299.99, status: 'Shipped', items: [{ name: 'Urban Runner', quantity: 1 }] },
+  { id: 'ORD-2024-002', date: '2024-06-28', total: 1899.99, status: 'Delivered', items: [{ name: 'Mountain Trekker', quantity: 1 }] },
+  { id: 'ORD-2023-12-10', date: '2023-12-10', total: 2499.99, status: 'Delivered', items: [{ name: 'Executive Oxford', quantity: 1 }] },
 ];
 
 export default function AccountPage() {
@@ -107,7 +107,7 @@ export default function AccountPage() {
                                                 <TableCell className="font-medium">{order.id}</TableCell>
                                                 <TableCell>{order.date}</TableCell>
                                                 <TableCell><Badge variant={order.status === 'Shipped' ? 'default' : 'secondary'}>{order.status}</Badge></TableCell>
-                                                <TableCell className="text-right">${order.total.toFixed(2)}</TableCell>
+                                                <TableCell className="text-right">₹{order.total.toFixed(2)}</TableCell>
                                                 <TableCell className="text-right">
                                                     <Button variant="outline" size="sm">View Details</Button>
                                                 </TableCell>

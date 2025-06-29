@@ -67,8 +67,9 @@ export default function ProductDetailPage({ params }: Props) {
           <div className="flex flex-col md:flex-row justify-between md:items-start gap-4">
             <div>
               <h1 className="font-headline text-4xl md:text-5xl font-bold">{product.name}</h1>
-              <div className="flex items-center gap-4 mt-2">
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
                 <Badge variant="default">{product.category}</Badge>
+                <Badge variant="outline">{product.collection}</Badge>
                 <div className="flex items-center gap-1">
                   {[...Array(5)].map((_, i) => (
                     <StarIcon
@@ -81,14 +82,24 @@ export default function ProductDetailPage({ params }: Props) {
               </div>
             </div>
             <div className="text-right flex-shrink-0">
-              <p className="text-4xl font-bold font-headline text-primary mb-2">${product.price.toFixed(2)}</p>
-              <Button
-                size="lg"
-                className="bg-accent hover:bg-accent/90 text-accent-foreground w-full md:w-auto"
-                onClick={() => addToCart(product)}
-              >
-                <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
-              </Button>
+                <div className="flex flex-col items-end mb-2">
+                    <div className="flex items-baseline gap-2">
+                        {product.discountPercentage && product.discountPercentage > 0 && product.originalPrice && (
+                            <del className="text-xl text-muted-foreground">₹{product.originalPrice}</del>
+                        )}
+                        <p className="text-4xl font-bold font-headline text-primary">₹{product.price}</p>
+                    </div>
+                    {product.discountPercentage && product.discountPercentage > 0 && (
+                        <p className="text-md font-semibold text-primary">You save {product.discountPercentage}%!</p>
+                    )}
+                </div>
+                <Button
+                    size="lg"
+                    className="bg-accent hover:bg-accent/90 text-accent-foreground w-full md:w-auto"
+                    onClick={() => addToCart(product)}
+                >
+                    <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
+                </Button>
             </div>
           </div>
         </header>

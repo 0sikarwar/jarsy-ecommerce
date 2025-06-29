@@ -4,9 +4,12 @@ export interface Product {
   slug: string;
   name: string;
   category: string;
+  collection: string;
   rating: number; // Mocked, as Medusa doesn't have a rating system
   description: string;
   price: number;
+  originalPrice?: number;
+  discountPercentage?: number;
   features: string[];
   images: {
     main: string;
@@ -46,6 +49,4 @@ export interface ProductImages {
 
 export interface TransformedProduct extends Product {
   images: ProductImages;
-  originalPrice?: number;
-  discountPercentage?: number;
 }
