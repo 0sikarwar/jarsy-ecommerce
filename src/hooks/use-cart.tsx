@@ -1,8 +1,8 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import type { Product } from '@/lib/templates';
-import { useToast } from './use-toast';
+import { createContext, useContext, useState, useEffect, useMemo } from "react";
+import { useToast } from "./use-toast";
+import { Product } from "@/lib/templatesTypes";
 
 export interface CartItem extends Product {
   quantity: number;
@@ -25,7 +25,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
-    const storedCart = localStorage.getItem('cart');
+    const storedCart = localStorage.getItem("cart");
     if (storedCart) {
       setItems(JSON.parse(storedCart));
     }
@@ -34,17 +34,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // This check prevents wiping the cart on initial load if localStorage is empty.
     if (items !== undefined) {
-      localStorage.setItem('cart', JSON.stringify(items));
+      localStorage.setItem("cart", JSON.stringify(items));
     }
   }, [items]);
 
   const addToCart = (product: Product) => {
-    setItems(prevItems => {
-      const existingItem = prevItems.find(item => item.id === product.id);
+    setItems((prevItems) => {
+      const existingItem = prevItems.find((item) => item.id === product.id);
       if (existingItem) {
-        return prevItems.map(item =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-        );
+        return prevItems.map((item) => (item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item));
       }
       return [...prevItems, { ...product, quantity: 1 }];
     });
@@ -55,18 +53,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const removeFromCart = (productId: string) => {
-    setItems(prevItems => prevItems.filter(item => item.id !== productId));
+    setItems((prevItems) => prevItems.filter((item) => item.id !== productId));
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
     if (quantity <= 0) {
       removeFromCart(productId);
     } else {
-      setItems(prevItems =>
-        prevItems.map(item =>
-          item.id === productId ? { ...item, quantity } : item
-        )
-      );
+      setItems((prevItems) => prevItems.map((item) => (item.id === productId ? { ...item, quantity } : item)));
     }
   };
 
@@ -77,13 +71,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const totalPrice = useMemo(() => {
     return items.reduce((total, item) => total + item.price * item.quantity, 0);
   }, [items]);
-  
+
   const itemCount = useMemo(() => {
     return items.reduce((count, item) => count + item.quantity, 0);
   }, [items]);
 
   return (
-    <CartContext.Provider value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, totalPrice, itemCount }}>
+    <CartContext.Provider
+      value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, totalPrice, itemCount }}
+    >
       {children}
     </CartContext.Provider>
   );
@@ -92,7 +88,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 export function useCart() {
   const context = useContext(CartContext);
   if (context === undefined) {
-    throw new Error('useCart must be used within a CartProvider');
+    throw new Error("useCart must be used within a CartProvider");
   }
   return context;
 }

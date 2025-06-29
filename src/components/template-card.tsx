@@ -1,10 +1,10 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import type { Product } from '@/lib/templates';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { StarIcon } from '@/components/icons';
-import { Button } from './ui/button';
+import Link from "next/link";
+import Image from "next/image";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { StarIcon } from "@/components/icons";
+import { Button } from "./ui/button";
+import { Product } from "@/lib/templatesTypes";
 
 interface ProductCardProps {
   product: Product;
