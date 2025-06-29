@@ -4,7 +4,7 @@ export interface Product {
   slug: string;
   name: string;
   category: string;
-  collection: string;
+  collection?: string;
   rating: number; // Mocked, as Medusa doesn't have a rating system
   description: string;
   price: number;

@@ -26,27 +26,27 @@ export function ProductCard({ product }: ProductCardProps) {
       </CardHeader>
       <CardContent className="p-4 flex-grow">
         <div className="flex justify-between items-start gap-2">
-            <CardTitle className="font-headline text-xl font-bold mb-2">
-                <Link href={`/templates/${product.slug}`} className="hover:text-primary transition-colors">
-                {product.name}
-                </Link>
-            </CardTitle>
-            <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                <Badge variant="secondary">{product.collection}</Badge>
-                <Badge variant="outline">{product.category}</Badge>
-            </div>
+          <CardTitle className="font-headline text-xl font-bold mb-2">
+            <Link href={`/templates/${product.slug}`} className="hover:text-primary transition-colors">
+              {product.name}
+            </Link>
+          </CardTitle>
+          <div className="flex items-end gap-1 flex-shrink-0">
+            <Badge variant="secondary">{product.collection}</Badge>
+            <Badge variant="outline">{product.category}</Badge>
+          </div>
         </div>
         <p className="text-muted-foreground text-sm line-clamp-2">{product.description}</p>
       </CardContent>
       <CardFooter className="p-4 flex justify-between items-center bg-secondary/50">
         <div className="flex flex-wrap items-baseline gap-x-2">
-            <span className="text-lg font-bold text-primary">₹{product.price}</span>
-            {product.discountPercentage && product.discountPercentage > 0 && product.originalPrice && (
-                <>
-                    <del className="text-sm text-muted-foreground">₹{product.originalPrice}</del>
-                    <span className="text-sm font-semibold text-primary">{product.discountPercentage}% off</span>
-                </>
-            )}
+          <span className="text-lg font-bold text-primary">₹{product.price}</span>
+          {product.discountPercentage && product.discountPercentage > 0 && product.originalPrice && (
+            <>
+              <del className="text-sm text-muted-foreground">₹{product.originalPrice}</del>
+              <span className="text-sm font-semibold text-primary">{product.discountPercentage}% off</span>
+            </>
+          )}
         </div>
         <Button asChild size="sm">
           <Link href={`/templates/${product.slug}`}>View Details</Link>

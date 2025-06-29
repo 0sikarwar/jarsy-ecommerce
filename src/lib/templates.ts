@@ -1,6 +1,6 @@
 //@ts-ignore
 import type { product as PricedProduct } from "@medusajs/js-sdk";
-import type { Product, ProductVariantPrice, ProductVariant, ProductImage } from "./templatesTypes";
+import type { Product, ProductVariantPrice, ProductVariant, ProductImage, TransformedProduct } from "./templatesTypes";
 import { medusaSdk } from "./mdedusa-sdk";
 
 function transformProduct(product: PricedProduct): Product {
@@ -12,36 +12,25 @@ function transformProduct(product: PricedProduct): Product {
   let originalPrice = 0;
   let discountPercentage = 0;
 
-  if (prices && prices.length > 0) {
-      // Assuming prices are sorted by amount, with sale price being lower
-      const salePriceObj = prices.find(p => p.price_list_type === 'sale');
-      const defaultPriceObj = prices.find(p => p.price_list_type !== 'sale' || !p.price_list_type);
-
-      if (salePriceObj && defaultPriceObj) {
-          price = salePriceObj.amount;
-          originalPrice = defaultPriceObj.amount;
-      } else {
-          price = prices.sort((a,b) => a.amount - b.amount)[0].amount;
-          originalPrice = price;
-      }
-      
-      if (originalPrice > price) {
-          discountPercentage = Math.round(((originalPrice - price) / originalPrice) * 100);
-      }
+  if (prices && prices.length >= 2) {
+    const sorted = prices.sort((a, b) => b.amount - a.amount);
+    originalPrice = sorted[0].amount;
+    price = sorted[1].amount;
+    discountPercentage = Math.round(((originalPrice - price) / originalPrice) * 100);
+  } else if (prices && prices.length === 1) {
+    price = originalPrice = prices[0].amount;
+    discountPercentage = 0;
   }
 
   const imageUrls: string[] = (product.images as ProductImage[] | undefined)?.map((img: ProductImage) => img.url) || [];
   const mainImage = product.thumbnail || imageUrls[0] || "https://placehold.co/800x600.png";
-  
-  // @ts-ignore
-  const category = product.categories?.[0]?.name || "Uncategorized";
 
-  const result: Product = {
+  const result: TransformedProduct = {
     id: product.id!,
     slug: product.handle!,
     name: product.title!,
-    category: category,
-    collection: product.collection?.title || "General Collection",
+    category: product.categories?.[0]?.name || "Uncategorized",
+    collection: product.collection?.title || "",
     rating: 4,
     description: product.description || "No description available.",
     price,
@@ -53,7 +42,6 @@ function transformProduct(product: PricedProduct): Product {
       previews: imageUrls.length > 0 ? imageUrls : [mainImage],
     },
   };
-
   return result;
 }
 
@@ -61,7 +49,7 @@ export async function getProducts(): Promise<Product[]> {
   try {
     const { products } = await medusaSdk.store.product.list(
       {
-        fields: `*variants.prices,*images,*collection,*categories`,
+        fields: `*variants.prices,*categories`,
         region_id: "reg_01JYXR4EHCTQMY10K0HFH4Y3MF",
       },
       {
@@ -77,7 +65,11 @@ export async function getProducts(): Promise<Product[]> {
 
 export async function getProductBySlug(slug: string): Promise<Product | undefined> {
   try {
-    const { products } = await medusaSdk.store.product.list({ fields: `*variants.prices,*images,*collection,*categories`, handle: slug, limit: 1 });
+    const { products } = await medusaSdk.store.product.list({
+      fields: `*variants.prices,*categories`,
+      handle: slug,
+      limit: 1,
+    });
     if (!products.length) {
       return undefined;
     }
