@@ -1,24 +1,23 @@
-
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useToast } from '@/hooks/use-toast';
-import { Loader2, LogIn } from 'lucide-react';
-import { loginAction } from '@/lib/actions/customer';
-import Link from 'next/link';
-import { useCustomer } from '@/hooks/use-customer';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2, LogIn } from "lucide-react";
+import { loginAction } from "@/lib/actions/customer";
+import Link from "next/link";
+import { useCustomer } from "@/hooks/use-customer";
 
 const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -32,26 +31,26 @@ export default function LoginPage() {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
   });
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     const result = await loginAction(data);
-    if (result.success) {
+    if (result?.success) {
       toast({
-        title: 'Login Successful',
-        description: 'Welcome back!',
+        title: "Login Successful",
+        description: "Welcome back!",
       });
       await refetchCustomer();
-      router.push('/account');
+      router.push("/account");
     } else {
       toast({
-        variant: 'destructive',
-        title: 'Login Failed',
-        description: result.error || 'An unknown error occurred.',
+        variant: "destructive",
+        title: "Login Failed",
+        description: result?.error || "An unknown error occurred.",
       });
       setIsLoading(false);
     }
@@ -95,13 +94,13 @@ export default function LoginPage() {
               />
               <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
                 {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogIn className="mr-2 h-5 w-5" />}
-                {isLoading ? 'Signing In...' : 'Sign In'}
+                {isLoading ? "Signing In..." : "Sign In"}
               </Button>
             </form>
           </Form>
           <div className="mt-6 text-center text-sm">
             <p className="text-muted-foreground">
-              Don&apos;t have an account?{' '}
+              Don&apos;t have an account?{" "}
               <Link href="/register" className="font-medium text-primary hover:underline">
                 Sign up
               </Link>

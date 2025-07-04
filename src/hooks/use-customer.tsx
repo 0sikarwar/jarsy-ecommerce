@@ -1,10 +1,10 @@
-
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 // @ts-ignore
 import type { Customer } from "@medusajs/medusa";
 import { getSessionAction } from "@/lib/actions/customer";
+import { usePathname, useRouter } from "next/navigation";
 
 interface CustomerContextType {
   customer: Customer | null;
@@ -13,8 +13,11 @@ interface CustomerContextType {
 }
 
 const CustomerContext = createContext<CustomerContextType | undefined>(undefined);
-
+const authRoutes = ["/login", "/register", "/forgot-password", "/reset-password"];
 export function CustomerProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const isAuthRoute = authRoutes.includes(pathname);
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -23,6 +26,7 @@ export function CustomerProvider({ children }: { children: ReactNode }) {
     const result = await getSessionAction();
     if (result.success && result.data) {
       setCustomer(result.data);
+      if (isAuthRoute) router.push("/");
     } else {
       setCustomer(null);
     }
@@ -38,9 +42,7 @@ export function CustomerProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <CustomerContext.Provider value={{ customer, isLoading, refetchCustomer }}>
-      {children}
-    </CustomerContext.Provider>
+    <CustomerContext.Provider value={{ customer, isLoading, refetchCustomer }}>{children}</CustomerContext.Provider>
   );
 }
 
