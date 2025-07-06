@@ -6,8 +6,6 @@ import { useToast } from "./use-toast";
 import type { Cart } from "@medusajs/types";
 import { medusaSdk } from "@/lib/mdedusa-sdk";
 
-const REGION_ID = "reg_01JYXR4EHCTQMY10K0HFH4Y3MF"; // You might want to make this dynamic based on user location
-
 interface CartContextType {
   cart: Cart | null;
   isLoading: boolean;
@@ -48,7 +46,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const createNewCart = useCallback(async () => {
     try {
-      const { cart: newCart } = await medusaSdk.store.carts.create({ region_id: REGION_ID });
+      // Create a cart without specifying a region. Medusa will use the default.
+      const { cart: newCart } = await medusaSdk.store.carts.create({});
       setCart(newCart);
       if (newCart.id) {
         setCartId(newCart.id);
