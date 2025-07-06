@@ -80,5 +80,25 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
   }
 }
 
-// Categories for filtering UI. In a real app, you might fetch these from Medusa as well.
-export const categories = ["All", "Sneakers", "Boots", "Sandals", "Formal"];
+export async function getCategories(): Promise<string[]> {
+  try {
+    const { product_categories } = await medusaSdk.store.category.list();
+    return ["All", ...(product_categories?.map((cat: { name: string }) => cat.name) || [])];
+  } catch (error) {
+    console.error("Failed to fetch categories from Medusa:", error);
+    return [];
+  }
+}
+
+export async function listPaymentProviders(regionId: string = "reg_01JYXR4EHCTQMY10K0HFH4Y3MF") {
+  try {
+    const { payment_providers } = await medusaSdk.store.payment.listPaymentProviders({
+      region_id: regionId,
+    });
+    console.log("payment_providers", payment_providers);
+    return payment_providers;
+  } catch (error) {
+    console.error("Failed to fetch payment providers from Medusa:", error);
+    return [];
+  }
+}

@@ -10,9 +10,10 @@ const categories = ["All", "Sneakers", "Boots", "Sandals", "Formal"];
 
 interface ProductGalleryProps {
   initialProducts: Product[];
+  categories: string[];
 }
 
-export const ProductGallery: FC<ProductGalleryProps> = ({ initialProducts }) => {
+export const ProductGallery: FC<ProductGalleryProps> = ({ initialProducts, categories }) => {
   const [activeCategory, setActiveCategory] = useState("All");
 
   const filteredProducts =
@@ -21,7 +22,7 @@ export const ProductGallery: FC<ProductGalleryProps> = ({ initialProducts }) => 
   return (
     <>
       <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full flex flex-col items-center mb-8">
-        <TabsList className="grid w-full max-w-lg grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
+        <TabsList className="grid w-[fit-content] max-w-lg grid-cols-2 sm:grid-cols-3 md:grid-cols-3">
           {categories.map((category) => (
             <TabsTrigger key={category} value={category}>
               {category}
