@@ -1,8 +1,10 @@
+
 // Product type for UI
 export interface Product {
   id: string;
   slug: string;
   name: string;
+  variantId: string;
   category: string;
   collection?: string;
   rating: number; // Mocked, as Medusa doesn't have a rating system

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -8,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { StarIcon } from "@/components/icons";
-import { CheckCircle2, ShoppingCart } from "lucide-react";
+import { CheckCircle2, ShoppingCart, Loader2 } from "lucide-react";
 import { AIContentGenerator } from "@/components/ai-content-generator";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
@@ -35,24 +36,24 @@ export default function ProductDetailPage({ params }: Props) {
   }, [params]);
 
   const [product, setProduct] = useState<Product | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const { addToCart } = useCart();
+  const [isLoadingProduct, setIsLoadingProduct] = useState(true);
+  const { addToCart, isLoading: isCartLoading } = useCart();
 
   useEffect(() => {
     if (!slug) return;
     const fetchProduct = async () => {
-      setIsLoading(true);
+      setIsLoadingProduct(true);
       const fetchedProduct = await getProductBySlug(slug);
       if (fetchedProduct) {
         setProduct(fetchedProduct);
       }
-      setIsLoading(false);
+      setIsLoadingProduct(false);
     };
 
     fetchProduct();
   }, [slug]);
 
-  if (isLoading) {
+  if (isLoadingProduct) {
     return <ProductDetailSkeleton />;
   }
 
@@ -96,9 +97,10 @@ export default function ProductDetailPage({ params }: Props) {
                 <Button
                     size="lg"
                     className="bg-accent hover:bg-accent/90 text-accent-foreground w-full md:w-auto"
-                    onClick={() => addToCart(product)}
+                    onClick={() => addToCart(product.variantId, 1)}
+                    disabled={isCartLoading}
                 >
-                    <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
+                    {isCartLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <ShoppingCart className="mr-2 h-5 w-5" />} Add to Cart
                 </Button>
             </div>
           </div>

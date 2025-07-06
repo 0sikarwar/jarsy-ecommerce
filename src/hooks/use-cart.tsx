@@ -1,19 +1,21 @@
+
 "use client";
 
-import { createContext, useContext, useState, useEffect, useMemo } from "react";
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 import { useToast } from "./use-toast";
-import { Product } from "@/lib/templatesTypes";
+import type { Cart } from "@medusajs/types";
+import { medusaSdk } from "@/lib/mdedusa-sdk";
 
-export interface CartItem extends Product {
-  quantity: number;
-}
+const REGION_ID = "reg_01JYXR4EHCTQMY10K0HFH4Y3MF"; // You might want to make this dynamic based on user location
 
 interface CartContextType {
-  items: CartItem[];
-  addToCart: (product: Product) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
-  clearCart: () => void;
+  cart: Cart | null;
+  isLoading: boolean;
+  addToCart: (variantId: string, quantity: number) => Promise<void>;
+  removeFromCart: (lineId: string) => Promise<void>;
+  updateQuantity: (lineId: string, quantity: number) => Promise<void>;
+  clearCart: () => Promise<void>;
+  retrieveCart: (cartId: string) => Promise<Cart | null>;
   totalPrice: number;
   itemCount: number;
 }
@@ -21,64 +23,165 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<Cart | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const storedCart = localStorage.getItem("cart");
-    if (storedCart) {
-      setItems(JSON.parse(storedCart));
+  const getCartId = (): string | null => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("cart_id");
     }
-  }, []);
+    return null;
+  };
 
-  useEffect(() => {
-    // This check prevents wiping the cart on initial load if localStorage is empty.
-    if (items !== undefined) {
-      localStorage.setItem("cart", JSON.stringify(items));
+  const setCartId = (cartId: string) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("cart_id", cartId);
     }
-  }, [items]);
+  };
 
-  const addToCart = (product: Product) => {
-    setItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item.id === product.id);
-      if (existingItem) {
-        return prevItems.map((item) => (item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item));
+  const removeCartId = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("cart_id");
+    }
+  };
+
+  const createNewCart = useCallback(async () => {
+    try {
+      const { cart: newCart } = await medusaSdk.store.carts.create({ region_id: REGION_ID });
+      setCart(newCart);
+      if (newCart.id) {
+        setCartId(newCart.id);
       }
-      return [...prevItems, { ...product, quantity: 1 }];
-    });
-    toast({
-      title: "Added to cart",
-      description: `${product.name} has been added to your cart.`,
-    });
-  };
+      return newCart;
+    } catch (error) {
+      console.error("Failed to create cart", error);
+      toast({ variant: "destructive", title: "Error", description: "Could not create a new cart." });
+      return null;
+    }
+  }, [toast]);
 
-  const removeFromCart = (productId: string) => {
-    setItems((prevItems) => prevItems.filter((item) => item.id !== productId));
-  };
+  const retrieveCart = useCallback(
+    async (cartId: string) => {
+      try {
+        const { cart: retrievedCart } = await medusaSdk.store.carts.retrieve(cartId);
+        setCart(retrievedCart);
+        return retrievedCart;
+      } catch (error) {
+        // If cart not found, it might have been completed, so create a new one.
+        console.error("Failed to retrieve cart, creating a new one.", error);
+        removeCartId();
+        return await createNewCart();
+      }
+    },
+    [createNewCart]
+  );
 
-  const updateQuantity = (productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-    } else {
-      setItems((prevItems) => prevItems.map((item) => (item.id === productId ? { ...item, quantity } : item)));
+  useEffect(() => {
+    const initializeCart = async () => {
+      setIsLoading(true);
+      const cartId = getCartId();
+      if (cartId) {
+        await retrieveCart(cartId);
+      } else {
+        await createNewCart();
+      }
+      setIsLoading(false);
+    };
+    initializeCart();
+  }, [createNewCart, retrieveCart]);
+
+  const addToCart = async (variantId: string, quantity: number) => {
+    let currentCart = cart;
+    if (!currentCart?.id) {
+      currentCart = await createNewCart();
+      if (!currentCart) {
+        toast({ variant: "destructive", title: "Error", description: "Cart not available." });
+        return;
+      }
+    }
+    setIsLoading(true);
+    try {
+      const { cart: updatedCart } = await medusaSdk.store.carts.lineItems.add(currentCart.id, {
+        variant_id: variantId,
+        quantity,
+      });
+      setCart(updatedCart);
+      toast({ title: "Added to cart", description: "Item has been added to your cart." });
+    } catch (error) {
+      console.error("Failed to add item to cart", error);
+      toast({ variant: "destructive", title: "Error", description: "Could not add item to cart." });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const clearCart = () => {
-    setItems([]);
+  const removeFromCart = async (lineId: string) => {
+    if (!cart?.id) {
+      toast({ variant: "destructive", title: "Error", description: "Cart not available." });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { cart: updatedCart } = await medusaSdk.store.carts.lineItems.delete(cart.id, lineId);
+      setCart(updatedCart);
+    } catch (error) {
+      console.error("Failed to remove item from cart", error);
+      toast({ variant: "destructive", title: "Error", description: "Could not remove item from cart." });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateQuantity = async (lineId: string, quantity: number) => {
+    if (!cart?.id) {
+      toast({ variant: "destructive", title: "Error", description: "Cart not available." });
+      return;
+    }
+    if (quantity <= 0) {
+      await removeFromCart(lineId);
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { cart: updatedCart } = await medusaSdk.store.carts.lineItems.update(cart.id, lineId, { quantity });
+      setCart(updatedCart);
+    } catch (error) {
+      console.error("Failed to update item quantity", error);
+      toast({ variant: "destructive", title: "Error", description: "Could not update item quantity." });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const clearCart = async () => {
+    setIsLoading(true);
+    removeCartId();
+    await createNewCart();
+    setIsLoading(false);
   };
 
   const totalPrice = useMemo(() => {
-    return items.reduce((total, item) => total + item.price * item.quantity, 0);
-  }, [items]);
+    return cart?.total ? cart.total / 100 : 0;
+  }, [cart]);
 
   const itemCount = useMemo(() => {
-    return items.reduce((count, item) => count + item.quantity, 0);
-  }, [items]);
+    return cart?.items?.reduce((count, item) => count + item.quantity, 0) || 0;
+  }, [cart]);
 
   return (
     <CartContext.Provider
-      value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, totalPrice, itemCount }}
+      value={{
+        cart,
+        isLoading,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        retrieveCart,
+        totalPrice,
+        itemCount,
+      }}
     >
       {children}
     </CartContext.Provider>

@@ -1,12 +1,14 @@
+
 //@ts-ignore
 import type { product as PricedProduct } from "@medusajs/js-sdk";
 import type { Product, ProductVariantPrice, ProductVariant, ProductImage, TransformedProduct } from "./templatesTypes";
 import { medusaSdk } from "./mdedusa-sdk";
 
 function transformProduct(product: PricedProduct): Product {
-  const prices: ProductVariantPrice[] | undefined = (
-    product.variants as ProductVariant[] | undefined
-  )?.[0]?.prices?.filter((p: ProductVariantPrice) => p.currency_code === "inr");
+  const firstVariant = (product.variants as ProductVariant[] | undefined)?.[0];
+  const prices: ProductVariantPrice[] | undefined = firstVariant?.prices?.filter(
+    (p: ProductVariantPrice) => p.currency_code === "inr"
+  );
 
   let price = 0;
   let originalPrice = 0;
@@ -29,6 +31,7 @@ function transformProduct(product: PricedProduct): Product {
     id: product.id!,
     slug: product.handle!,
     name: product.title!,
+    variantId: firstVariant?.id!,
     category: product.categories?.[0]?.name || "Uncategorized",
     collection: product.collection?.title || "",
     rating: 4,
@@ -86,19 +89,6 @@ export async function getCategories(): Promise<string[]> {
     return ["All", ...(product_categories?.map((cat: { name: string }) => cat.name) || [])];
   } catch (error) {
     console.error("Failed to fetch categories from Medusa:", error);
-    return [];
-  }
-}
-
-export async function listPaymentProviders(regionId: string = "reg_01JYXR4EHCTQMY10K0HFH4Y3MF") {
-  try {
-    const { payment_providers } = await medusaSdk.store.payment.listPaymentProviders({
-      region_id: regionId,
-    });
-    console.log("payment_providers", payment_providers);
-    return payment_providers;
-  } catch (error) {
-    console.error("Failed to fetch payment providers from Medusa:", error);
     return [];
   }
 }
