@@ -1,6 +1,7 @@
 "use client";
 
 import { medusaSdk } from "@/lib/mdedusa-sdk";
+import { StoreCart } from "@medusajs/types";
 import { z } from "zod";
 
 // Schemas
@@ -41,7 +42,7 @@ const handleError = (msg: string, error?: unknown): { success: false; error: str
   return { success: false, error: errorMessage };
 };
 
-export async function loginAction(data: unknown) {
+export async function loginAction(data: unknown, cart: StoreCart | null) {
   const validation = LoginSchema.safeParse(data);
   if (!validation.success) {
     return { success: false, error: "Invalid input." };
@@ -59,6 +60,9 @@ export async function loginAction(data: unknown) {
       return;
     }
     medusaSdk.client.setToken(result);
+    if (cart?.id) {
+      medusaSdk.store.cart.transferCart(cart.id);
+    }
     const { customer } = await medusaSdk.store.customer.retrieve();
     return { success: true, data: customer, error: null };
   } catch (error) {

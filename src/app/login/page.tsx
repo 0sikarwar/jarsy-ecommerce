@@ -14,6 +14,7 @@ import { Loader2, LogIn } from "lucide-react";
 import { loginAction } from "@/lib/actions/customer";
 import Link from "next/link";
 import { useCustomer } from "@/hooks/use-customer";
+import { useCart } from "@/hooks/use-cart";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -27,6 +28,7 @@ export default function LoginPage() {
   const { toast } = useToast();
   const { refetchCustomer } = useCustomer();
   const [isLoading, setIsLoading] = useState(false);
+  const { cart } = useCart();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -38,7 +40,7 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
-    const result = await loginAction(data);
+    const result = await loginAction(data, cart);
     if (result?.success) {
       toast({
         title: "Login Successful",

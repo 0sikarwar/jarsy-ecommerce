@@ -1,4 +1,3 @@
-
 //@ts-ignore
 import type { product as PricedProduct } from "@medusajs/js-sdk";
 import type { Product, ProductVariantPrice, ProductVariant, ProductImage, TransformedProduct } from "./templatesTypes";

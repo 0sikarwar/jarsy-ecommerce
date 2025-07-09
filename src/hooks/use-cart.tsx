@@ -1,27 +1,27 @@
-
 "use client";
 
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 import { useToast } from "./use-toast";
-import type { Cart } from "@medusajs/types";
+import type { StoreCart } from "@medusajs/types";
 import { medusaSdk } from "@/lib/mdedusa-sdk";
 
 interface CartContextType {
-  cart: Cart | null;
+  cart: StoreCart | null;
   isLoading: boolean;
   addToCart: (variantId: string, quantity: number) => Promise<void>;
   removeFromCart: (lineId: string) => Promise<void>;
   updateQuantity: (lineId: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
-  retrieveCart: (cartId: string) => Promise<Cart | null>;
+  retrieveCart: (cartId: string) => Promise<StoreCart | null>;
   totalPrice: number;
   itemCount: number;
+  setCart: (cart: StoreCart | null) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [cart, setCart] = useState<Cart | null>(null);
+  const [cart, setCart] = useState<StoreCart | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -47,7 +47,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const createNewCart = useCallback(async () => {
     try {
       // Create a cart without specifying a region. Medusa will use the default.
-      const { cart: newCart } = await medusaSdk.store.carts.create({});
+      const { cart: newCart } = await medusaSdk.store.cart.create({ region_id: "reg_01JYXR4EHCTQMY10K0HFH4Y3MF" });
       setCart(newCart);
       if (newCart.id) {
         setCartId(newCart.id);
@@ -63,7 +63,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const retrieveCart = useCallback(
     async (cartId: string) => {
       try {
-        const { cart: retrievedCart } = await medusaSdk.store.carts.retrieve(cartId);
+        const { cart: retrievedCart } = await medusaSdk.store.cart.retrieve(cartId);
         setCart(retrievedCart);
         return retrievedCart;
       } catch (error) {
@@ -101,7 +101,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
     setIsLoading(true);
     try {
-      const { cart: updatedCart } = await medusaSdk.store.carts.lineItems.add(currentCart.id, {
+      const { cart: updatedCart } = await medusaSdk.store.cart.createLineItem(currentCart.id, {
         variant_id: variantId,
         quantity,
       });
@@ -122,8 +122,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
     setIsLoading(true);
     try {
-      const { cart: updatedCart } = await medusaSdk.store.carts.lineItems.delete(cart.id, lineId);
-      setCart(updatedCart);
+      const { parent: updatedCart } = await medusaSdk.store.cart.deleteLineItem(cart.id, lineId);
+      if (updatedCart) setCart(updatedCart);
     } catch (error) {
       console.error("Failed to remove item from cart", error);
       toast({ variant: "destructive", title: "Error", description: "Could not remove item from cart." });
@@ -143,7 +143,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
     setIsLoading(true);
     try {
-      const { cart: updatedCart } = await medusaSdk.store.carts.lineItems.update(cart.id, lineId, { quantity });
+      const { cart: updatedCart } = await medusaSdk.store.cart.updateLineItem(cart.id, lineId, { quantity });
       setCart(updatedCart);
     } catch (error) {
       console.error("Failed to update item quantity", error);
@@ -161,7 +161,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const totalPrice = useMemo(() => {
-    return cart?.total ? cart.total / 100 : 0;
+    return cart?.total ? cart.total : 0;
   }, [cart]);
 
   const itemCount = useMemo(() => {
@@ -180,6 +180,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         retrieveCart,
         totalPrice,
         itemCount,
+        setCart,
       }}
     >
       {children}

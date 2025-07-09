@@ -35,7 +35,7 @@ export default function OrdersTab({ orders, isLoading }: { orders: StoreOrder[];
                   <TableCell>
                     <Badge variant="secondary">{order.fulfillment_status}</Badge>
                   </TableCell>
-                  <TableCell className="text-right">₹{(order.total / 100).toFixed(2)}</TableCell>
+                  <TableCell className="text-right">₹{order.total.toFixed(2)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -17,28 +16,29 @@ import { CreditCard, Loader2, ChevronsRight, Truck } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useCustomer } from "@/hooks/use-customer";
 import { medusaSdk } from "@/lib/mdedusa-sdk";
-import type { ShippingOption, AddressPayload, Cart } from "@medusajs/types";
+import type { CartLineItemDTO, ShippingOptionDTO, StoreCartLineItem, StoreCartShippingOption } from "@medusajs/types";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { SHIPPING_METHOD_ID } from "@/lib/constants";
+import { Label } from "@/components/ui/label";
+import { Product } from "@/lib/templatesTypes";
 
 // Address schema for validation
 const addressSchema = z.object({
   first_name: z.string().min(2, "First name is required"),
   last_name: z.string().min(2, "Last name is required"),
   address_1: z.string().min(5, "Address is required"),
-  address_2: z.string().optional(),
   city: z.string().min(2, "City is required"),
   province: z.string().optional(),
   postal_code: z.string().min(4, "Postal code is required"),
   country_code: z.string().length(2, "Country code must be 2 letters").default("in"),
   phone: z.string().optional(),
-  email: z.string().email("Invalid email address"),
 });
 
 type AddressFormValues = z.infer<typeof addressSchema>;
 type CheckoutStep = "address" | "shipping" | "payment";
 
 export default function CheckoutPage() {
-  const { cart, clearCart, itemCount, retrieveCart } = useCart();
+  const { cart, clearCart, itemCount, retrieveCart, setCart } = useCart();
   const { customer } = useCustomer();
   const router = useRouter();
   const { toast } = useToast();
@@ -47,7 +47,7 @@ export default function CheckoutPage() {
   const [isClient, setIsClient] = useState(false);
   const [step, setStep] = useState<CheckoutStep>("address");
 
-  const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
+  const [shippingOptions, setShippingOptions] = useState<StoreCartShippingOption[]>([]);
   const [selectedShipping, setSelectedShipping] = useState<string | null>(null);
 
   const addressForm = useForm<AddressFormValues>({
@@ -68,7 +68,6 @@ export default function CheckoutPage() {
       addressForm.reset({
         first_name: customer.first_name || "",
         last_name: customer.last_name || "",
-        email: customer.email,
         address_1: defaultAddress?.address_1 || "",
         city: defaultAddress?.city || "",
         postal_code: defaultAddress?.postal_code || "",
@@ -82,13 +81,18 @@ export default function CheckoutPage() {
     if (!cart) return;
     setIsLoading(true);
     try {
-      // Update cart with address and email
-      await medusaSdk.store.carts.update(cart.id, {
+      const { cart: updatedCart } = await medusaSdk.store.cart.update(cart.id, {
+        region_id: cart.region_id,
         shipping_address: data,
-        email: data.email,
+        billing_address: data,
       });
-      // Fetch shipping options
-      const { shipping_options } = await medusaSdk.store.carts.shippingOptions.list(cart.id);
+      setCart(updatedCart);
+      const { shipping_options } = await medusaSdk.store.fulfillment.listCartOptions({
+        cart_id: cart.id,
+      });
+      //   const res = await medusaSdk.store.fulfillment.calculate(SHIPPING_METHOD_ID, {
+      //     cart_id: cart.id,
+      //   });
       setShippingOptions(shipping_options);
       setStep("shipping");
     } catch (error) {
@@ -102,10 +106,16 @@ export default function CheckoutPage() {
     if (!cart || !selectedShipping) return;
     setIsLoading(true);
     try {
-      await medusaSdk.store.carts.shippingMethods.add(cart.id, { option_id: selectedShipping });
-      await medusaSdk.store.carts.paymentSessions.create(cart.id);
+      const { cart: updatedCart } = await medusaSdk.store.cart.addShippingMethod(cart.id, {
+        option_id: selectedShipping,
+      });
+      setCart(updatedCart);
+      const { payment_providers } = await medusaSdk.store.payment.listPaymentProviders({
+        region_id: cart.region_id || "",
+      });
+      await medusaSdk.store.payment.initiatePaymentSession(cart, { provider_id: "pp_system_default" });
       // For this demo, we auto-select the 'manual' payment provider
-      await medusaSdk.store.carts.paymentSessions.select(cart.id, { provider_id: "manual" });
+      // await medusaSdk.store.cart.paymentSessions.select(cart.id, { provider_id: "pp_system_default" });
       if (cart.id) await retrieveCart(cart.id); // Refresh cart state
       setStep("payment");
     } catch (error) {
@@ -119,7 +129,7 @@ export default function CheckoutPage() {
     if (!cart) return;
     setIsLoading(true);
     try {
-      const { type } = await medusaSdk.store.carts.complete(cart.id);
+      const { type } = await medusaSdk.store.cart.complete(cart.id);
       if (type === "order") {
         toast({ title: "Payment Successful!", description: "Your order has been placed." });
         await clearCart();
@@ -135,9 +145,9 @@ export default function CheckoutPage() {
   const summary = useMemo(() => {
     if (!cart) return { subtotal: 0, shipping: 0, total: 0 };
     return {
-      subtotal: (cart.subtotal || 0) / 100,
-      shipping: (cart.shipping_total || 0) / 100,
-      total: (cart.total || 0) / 100,
+      subtotal: cart.subtotal || 0,
+      shipping: cart.shipping_total || 0,
+      total: cart.total || 0,
     };
   }, [cart]);
 
@@ -164,20 +174,95 @@ export default function CheckoutPage() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
-                      <FormField name="first_name" control={addressForm.control} render={({ field }) => <FormItem><FormLabel>First Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
-                      <FormField name="last_name" control={addressForm.control} render={({ field }) => <FormItem><FormLabel>Last Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
+                      <FormField
+                        name="first_name"
+                        control={addressForm.control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>First Name</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        name="last_name"
+                        control={addressForm.control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Last Name</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
-                    <FormField name="email" control={addressForm.control} render={({ field }) => <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>} />
-                    <FormField name="address_1" control={addressForm.control} render={({ field }) => <FormItem><FormLabel>Address</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
+                    <FormField
+                      name="address_1"
+                      control={addressForm.control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Address</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     <div className="grid grid-cols-2 gap-4">
-                      <FormField name="city" control={addressForm.control} render={({ field }) => <FormItem><FormLabel>City</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
-                      <FormField name="postal_code" control={addressForm.control} render={({ field }) => <FormItem><FormLabel>Postal Code</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
+                      <FormField
+                        name="city"
+                        control={addressForm.control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>City</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        name="postal_code"
+                        control={addressForm.control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Postal Code</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
-                    <FormField name="phone" control={addressForm.control} render={({ field }) => <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem>} />
+                    <FormField
+                      name="phone"
+                      control={addressForm.control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone</FormLabel>
+                          <FormControl>
+                            <Input type="tel" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </CardContent>
                 </Card>
                 <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
-                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ChevronsRight className="mr-2 h-5 w-5" />}
+                  {isLoading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <ChevronsRight className="mr-2 h-5 w-5" />
+                  )}
                   Continue to Shipping
                 </Button>
               </form>
@@ -198,13 +283,22 @@ export default function CheckoutPage() {
                       <RadioGroupItem value={option.id} id={option.id} />
                       <Label htmlFor={option.id} className="flex justify-between w-full items-center">
                         <span>{option.name}</span>
-                        <span className="font-bold">₹{(option.amount || 0) / 100}</span>
+                        <span className="font-bold">₹{option.amount || 0}</span>
                       </Label>
                     </div>
                   ))}
                 </RadioGroup>
-                <Button onClick={handleShippingSubmit} size="lg" className="w-full mt-4" disabled={isLoading || !selectedShipping}>
-                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ChevronsRight className="mr-2 h-5 w-5" />}
+                <Button
+                  onClick={handleShippingSubmit}
+                  size="lg"
+                  className="w-full mt-4"
+                  disabled={isLoading || !selectedShipping}
+                >
+                  {isLoading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <ChevronsRight className="mr-2 h-5 w-5" />
+                  )}
                   Continue to Payment
                 </Button>
               </CardContent>
@@ -219,12 +313,12 @@ export default function CheckoutPage() {
                 <CardDescription>You are ready to complete your order.</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="bg-muted p-4 rounded-lg mb-6">
-                  <p className="font-semibold">Test Payment</p>
-                  <p className="text-sm text-muted-foreground">This is a test store. No real payment will be processed.</p>
-                </div>
                 <Button onClick={handleCompleteOrder} size="lg" className="w-full" disabled={isLoading}>
-                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-5 w-5" />}
+                  {isLoading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <CreditCard className="mr-2 h-5 w-5" />
+                  )}
                   {isLoading ? "Processing..." : `Pay ₹${summary.total.toFixed(2)}`}
                 </Button>
               </CardContent>
@@ -237,7 +331,7 @@ export default function CheckoutPage() {
           <h2 className="font-headline text-2xl font-bold">Order Summary</h2>
           <Card>
             <CardContent className="space-y-4 pt-6">
-              {cart.items.map((item) => (
+              {cart.items?.map((item: StoreCartLineItem) => (
                 <div key={item.id} className="flex justify-between items-center">
                   <div className="flex items-center gap-4">
                     <Image
@@ -249,10 +343,10 @@ export default function CheckoutPage() {
                     />
                     <div>
                       <p className="font-medium">{item.title}</p>
-                      <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
+                      <p className="text-sm text-muted-foreground">Qty: {Number(item.quantity)}</p>
                     </div>
                   </div>
-                  <p>₹{((item.total || 0) / 100).toFixed(2)}</p>
+                  <p>₹{(Number(item.unit_price) * Number(item.quantity) || 0).toFixed(2)}</p>
                 </div>
               ))}
               <Separator />
